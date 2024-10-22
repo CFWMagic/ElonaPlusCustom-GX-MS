@@ -10120,6 +10120,10 @@
 				s = nquestdate
 				break
 			}
+			if ( s == "n" ) {
+				s = "\n"
+				break
+			}
 			if ( s == "player" ) {
 				s = cdatan(CDATAN_NAME, CHARA_PLAYER)
 				break

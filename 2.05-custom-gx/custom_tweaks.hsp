@@ -455,6 +455,23 @@ TweakData(54, 4) = "Display Day/Night Cycle Everywhere."
 			return " (Currently: Disabled)"
 		}
 	}
+	if ( TweakCategory == TWEAK_CATEGORY_GAMEPLAY ) & ( TweakNumber == TWEAK_GAMEPLAY_SPELL_PROCS ) {
+		if ( TweakData(TweakNumber, TweakCategory) == 1 ) {
+			return " (Currently: Main-Hand Staff)"
+		}
+		if ( TweakData(TweakNumber, TweakCategory) == 2 ) {
+			return " (Currently: All Equipped Staff)"
+		}
+		if ( TweakData(TweakNumber, TweakCategory) == 3 ) {
+			return " (Currently: Main-Hand Weapon)"
+		}
+		if ( TweakData(TweakNumber, TweakCategory) == 4 ) {
+			return " (Currently: All Equipped Weapon)"
+		}
+		else {
+			return " (Currently: Disabled)"
+		}
+	}
 	if ( TweakData(TweakNumber, TweakCategory) == 1 ) {
 		return " (Currently: On)"
 	}
@@ -1196,7 +1213,7 @@ TweakData(54, 4) = "Display Day/Night Cycle Everywhere."
 	cs = 0
 	page = 0
 	pagesize = 16
-	listmax = 13
+	listmax = 14
 *GameplayExtraTweakMenu_pgchk
 	redraw 0
 	page_check
@@ -1219,6 +1236,7 @@ TweakData(54, 4) = "Display Day/Night Cycle Everywhere."
 	listn(0, 9) = "Enable loot in Moongate/Rune maps." + GetTStatus(TWEAK_CATEGORY_GAMEPLAY, TWEAK_GAMEPLAY_MOONGATE_LOOT)
 	listn(0, 10) = "Enable Noa's unused gathering text adventure." + GetTStatus(TWEAK_CATEGORY_GAMEPLAY, TWEAK_GAMEPLAY_GATHER_TEXT_ADVENTURE)
 	listn(0, 11) = "Allow playing Termination Card Game (TCG) against anyone." + GetTStatus(TWEAK_CATEGORY_GAMEPLAY, TWEAK_GAMEPLAY_SHADOW_CARD_GAME)
+	listn(0, 12) = "Allow spells to activate weapon enchantment." + GetTStatus(TWEAK_CATEGORY_GAMEPLAY, TWEAK_GAMEPLAY_SPELL_PROCS)
 
 	listn(0, listmax - 1) = "Return."
 	font lang(cfg_font1, cfg_font2), 14 - en * 2, 0
@@ -1277,6 +1295,9 @@ TweakData(54, 4) = "Display Day/Night Cycle Everywhere."
 			}
 			if ( p == 11 ) {
 				s = "Enable a lethal round of TCG against any NPC.\nThe winner gets a card of loser. And the loser DIES.\nBoss decks are still WIP."
+			}
+			if ( p == 12 ) {
+				s = "Allow spells to activate weapon enchantments.\nHighly unbalanced, as spells are balanced towards not having procs."
 			}
 
 			if ( p == listmax - 1 ) {
@@ -1371,6 +1392,13 @@ TweakData(54, 4) = "Display Day/Night Cycle Everywhere."
 		tc = TWEAK_CATEGORY_GAMEPLAY
 		tn = TWEAK_GAMEPLAY_SHADOW_CARD_GAME
 		gosub *ToggleTweak
+	}
+	if ( p == 12 ) {
+		tc = TWEAK_CATEGORY_GAMEPLAY
+		tn = TWEAK_GAMEPLAY_SPELL_PROCS
+		ts = 1
+		tm = 4
+		gosub *IncrementTweak
 	}
 
 	if ( p == listmax - 1 ) {

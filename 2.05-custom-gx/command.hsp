@@ -7547,6 +7547,7 @@
 			if ( cnt == CHARA_BIT_SPLIT_NO_EFFECT ) { locvar_calccostcnpcsummon_multiplier += 8 }
 		}
 	loop
+	locvar_calccostcnpcsummon_multiplier = limit(locvar_calccostcnpcsummon_multiplier / 3, 1, 300)
 	if ( gdata(GDATA_FLAG_MAIN) >= 180 ) { locvar_calccostcnpcsummon_multiplier = limit(locvar_calccostcnpcsummon_multiplier * 2 / 3, 1, 300) }
 	if ( gdata(GDATA_FLAG_MAIN) >= 340 ) { locvar_calccostcnpcsummon_multiplier = limit(locvar_calccostcnpcsummon_multiplier * 2 / 3, 1, 300) }
 	if ( gdata(GDATA_FLAG_MAIN) >= 720 ) { locvar_calccostcnpcsummon_multiplier = limit(locvar_calccostcnpcsummon_multiplier * 2 / 3, 1, 300) }

@@ -7430,6 +7430,13 @@
 			}
 			if ( _switch_val == SKILL_TYPE_BOLT | _switch_sw ) {
 				_switch_sw = 0
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+				if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+					dim chaintc, MAX_CHARA_TOTAL
+					dim chaindmg, MAX_CHARA_TOTAL
+					chaincnt = 0
+				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 				get_route cdata(CDATA_X, cc), cdata(CDATA_Y, cc), tlocx, tlocy
 				if ( stat == 0 ) {
 					goto *effect_SWEND1
@@ -7619,6 +7626,15 @@
 									}
 								}
 							}
+							/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+							if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+								if ( cdata(CDATA_EXIST, tc) == CHAR_STATE_ALIVE ) {
+									chaintc(chaincnt) = tc
+									chaindmg(chaincnt) = dmg
+									chaincnt++
+								}
+							}
+							/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 							if ( gdata(GDATA_TEMPORARY_FLAGS) == 0 ) {
 								if ( cdata(CDATA_REFLECT_MAGIC, tc) > 0 ) {
 									if ( cc >= MAX_CHARA_FOLLOWER | tc >= MAX_CHARA_FOLLOWER ) {
@@ -7651,6 +7667,48 @@
 						}
 					}
 				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+				if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+					if ( efid == SKILL_SPELL_FIRE_BOLT | efid == SKILL_SPELL_ICE_BOLT | efid == SKILL_SPELL_LIGHTNING_BOLT | efid == SKILL_SPELL_DARKNESS_BOLT | efid == SKILL_SPELL_MIND_BOLT | efid == SKILL_SPELL_NETHER_BOLT | efid == SKILL_SPELL_POISON_BOLT | efid == SKILL_SPELL_SOUND_BOLT | efid == SKILL_SPELL_CHAOS_BOLT | efid == SKILL_SPELL_NERVE_BOLT | efid == SKILL_SPELL_CRYSTAL_SPEAR ) {
+						repeat chaincnt
+							tc = chaintc(cnt)
+							orgdmg = chaindmg(cnt) / 2
+							repeat MAX_EQUIP_SLOT_TOTAL
+								preattackitem = attackitem
+								precw = cw
+								preammoproc = ammoproc
+								prerapidmagic = rapidmagic
+								subbody = CDATA_STARTING_EQUIP_SLOTS + cnt
+								if ( cdata(subbody, cc) \ 10000 == 0 ) {
+									continue
+								}
+								if ( cdata(subbody, cc) / 10000 != EQUIP_SLOT_HAND & cdata(subbody, cc) / 10000 != EQUIP_SLOT_SHOOT ) {
+									continue
+								}
+								attackitem = cdata(subbody, cc) \ 10000 - 1
+								if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 2 ) {
+									if ( refitem(inv(INV_ITEM_ID, attackitem), DBSPEC_TYPE_MINOR) != FILTER_WEAPON_STAVE ) {
+										continue
+									}
+								}
+								attackskill = SKILL_NORMAL_MAGIC_DEVICE
+								ammoproc = 0
+								rapidmagic = 0
+								chainflag = 1
+								gosub *act_attackSub
+								attackitem = preattackitem
+								cw = precw
+								ammoproc = preammoproc
+								rapidmagic = prerapidmagic
+								if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 3 ) {
+									break
+								}
+							loop
+						loop
+					}
+					chainflag = 0
+				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 				if ( tcbbk != (-1) ) {
 					if ( cdata(CDATA_EXIST, tcbbk) == CHAR_STATE_ALIVE ) {
 						tc = tcbbk
@@ -7664,6 +7722,13 @@
 			}
 			if ( _switch_val == SKILL_TYPE_BALL | _switch_sw ) {
 				_switch_sw = 0
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+				if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+					dim chaintc, MAX_CHARA_TOTAL
+					dim chaindmg, MAX_CHARA_TOTAL
+					chaincnt = 0
+				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 				tcbbk = -1
 				magc = 0
 				if ( efid != SKILL_SPACT_RAIN_OF_SANITY ) {
@@ -7992,6 +8057,15 @@
 										}
 									}
 								}
+								/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+								if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+									if ( cdata(CDATA_EXIST, tc) == CHAR_STATE_ALIVE ) {
+										chaintc(chaincnt) = tc
+										chaindmg(chaincnt) = dmg
+										chaincnt++
+									}
+								}
+								/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 								if ( cdata(CDATA_REFLECT_MAGIC, tc) > 0 ) {
 									if ( efid != SKILL_SPACT_GRENADE ) {
 										if ( cc >= MAX_CHARA_FOLLOWER | tc >= MAX_CHARA_FOLLOWER ) {
@@ -8034,6 +8108,48 @@
 						gosub *charaRefresh
 					}
 				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - BEGINNING **********/
+				if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+					if ( efid == SKILL_SPELL_FIRE_BALL | efid == SKILL_SPELL_ICE_BALL | efid == SKILL_SPELL_THUNDER_VORTEX | efid == SKILL_SPELL_ECLIPSE | efid == SKILL_SPELL_ILLUSION_ROAR | efid == SKILL_SPELL_NETHER_WAVE | efid == SKILL_SPELL_POISON_STORM | efid == SKILL_SPELL_RAGING_ROAR | efid == SKILL_SPELL_CHAOS_BALL | efid == SKILL_SPELL_ANGUISH_JAIL | efid == SKILL_SPELL_MAGIC_STORM ) {
+						repeat chaincnt
+							tc = chaintc(cnt)
+							orgdmg = chaindmg(cnt) / 3
+							repeat MAX_EQUIP_SLOT_TOTAL
+								preattackitem = attackitem
+								precw = cw
+								preammoproc = ammoproc
+								prerapidmagic = rapidmagic
+								subbody = CDATA_STARTING_EQUIP_SLOTS + cnt
+								if ( cdata(subbody, cc) \ 10000 == 0 ) {
+									continue
+								}
+								if ( cdata(subbody, cc) / 10000 != EQUIP_SLOT_HAND ) {
+									continue
+								}
+								attackitem = cdata(subbody, cc) \ 10000 - 1
+								if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 2 ) {
+									if ( refitem(inv(INV_ITEM_ID, attackitem), DBSPEC_TYPE_MINOR) != FILTER_WEAPON_STAVE ) {
+										continue
+									}
+								}
+								attackskill = SKILL_NORMAL_MAGIC_DEVICE
+								ammoproc = 0
+								rapidmagic = 0
+								chainflag = 1
+								gosub *act_attackSub
+								attackitem = preattackitem
+								cw = precw
+								ammoproc = preammoproc
+								rapidmagic = prerapidmagic
+								if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 3 ) {
+									break
+								}
+							loop
+						loop
+					}
+					chainflag = 0
+				}
+				/********** MMAHACK/JAMES - SPELL PROC STAFF PROC - ENDING **********/
 				if ( efid == SKILL_SPACT_SUICIDE_ATTACK ) {
 					cdata(CDATA_HP, cc) = 0
 					dmghp cc, 99999, DAMAGE_FROM_SUICIDE
@@ -8159,6 +8275,43 @@
 						}
 					}
 				}
+				/********** MMAHACK - SPELL PROC STAFF PROC - BEGINNING **********/
+				if ( chainflag == 0 & gdata(GDATA_ACTIVATE_PROC) == 0 & TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
+					orgdmg = dmg
+					repeat MAX_EQUIP_SLOT_TOTAL
+						preattackitem = attackitem
+						precw = cw
+						preammoproc = ammoproc
+						prerapidmagic = rapidmagic
+						subbody = CDATA_STARTING_EQUIP_SLOTS + cnt
+						if ( cdata(subbody, cc) \ 10000 == 0 ) {
+							continue
+						}
+						if ( cdata(subbody, cc) / 10000 != EQUIP_SLOT_HAND ) {
+							continue
+						}
+						attackitem = cdata(subbody, cc) \ 10000 - 1
+						if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 2 ) {
+							if ( refitem(inv(INV_ITEM_ID, attackitem), DBSPEC_TYPE_MINOR) != FILTER_WEAPON_STAVE ) {
+								continue
+							}
+						}
+						attackskill = SKILL_NORMAL_MAGIC_DEVICE
+						ammoproc = 0
+						rapidmagic = 0
+						chainflag = 1
+						gosub *act_attackSub
+						attackitem = preattackitem
+						cw = precw
+						ammoproc = preammoproc
+						rapidmagic = prerapidmagic
+						if ( TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 1 | TweakData(TWEAK_GAMEPLAY_SPELL_PROCS, TWEAK_CATEGORY_GAMEPLAY) == 3 ) {
+							break
+						}
+					loop
+					chainflag = 0
+				}
+				/********** MMAHACK - MOUSE OPERATION - ENDING **********/
 				if ( cdata(CDATA_REFLECT_MAGIC, tc) > 0 ) {
 					dmghp cc, limit(dmg * cdata(CDATA_REFLECT_MAGIC, tc) / 200 + 1, 1, cdata(CDATA_MAX_HP, cc) / 10), tc, ele, elep
 					if ( synccheck(tc, -1) ) {
