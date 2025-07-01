@@ -1,7 +1,7 @@
 #pack "scene1.hsp"
 #pack "scene2.hsp"
 #packopt type 0
-#packopt name "ElonaPlusCGX"
+#packopt name "ElonaPlusCGXMS"
 #packopt icon "icon.ico"
 #cmpopt varname 1
 
