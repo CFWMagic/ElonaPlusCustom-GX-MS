@@ -20,29 +20,21 @@
 			if ( gdata(GDATA_WORLD) == AREA_NORTH_TYRIS | gdata(GDATA_WORLD) == AREA_SOUTH_TYRIS ) {
 				if ( mdata(MDATA_TYPE) == MAP_TYPE_TOWN ) {
 					if ( gdata(GDATA_AREA) != AREA_MELUGAS ) {
-						if ( rnd(100) == 0 ) {
-							dbid = CREATURE_ID_WEREWOLF
-							return
+						if ( findchara(CREATURE_ID_KYU_BI) == 0 ) {
+							if ( rnd(100) == 0 ) {
+								dbid = CREATURE_ID_WEREWOLF
+								return
+							}
 						}
-					}
-				}
-			}
-			if ( gdata(GDATA_WORLD) == AREA_NORTH_TYRIS | gdata(GDATA_WORLD) == AREA_SOUTH_TYRIS ) {
-				if ( mdata(MDATA_TYPE) == MAP_TYPE_TOWN ) {
-					if ( gdata(GDATA_AREA) != AREA_MELUGAS ) {
 						if ( rnd(100) == 0 ) {
 							dbid = CREATURE_ID_SUNBARARIAN
 							return
 						}
-					}
-				}
-			}
-			if ( gdata(GDATA_WORLD) == AREA_NORTH_TYRIS | gdata(GDATA_WORLD) == AREA_SOUTH_TYRIS ) {
-				if ( mdata(MDATA_TYPE) == MAP_TYPE_TOWN ) {
-					if ( gdata(GDATA_AREA) != AREA_MELUGAS ) {
-						if ( rnd(300) == 0 ) {
-							dbid = CREATURE_ID_FOX_SPIRIT
-							return
+						if ( findchara(CREATURE_ID_GODWOLF) == 0 ) {
+							if ( rnd(300) == 0 ) {
+								dbid = CREATURE_ID_FOX_SPIRIT
+								return
+							}
 						}
 					}
 				}
@@ -1188,19 +1180,19 @@
 		loop
 	}
 	if ( adata(ADATA_ID, gdata(GDATA_AREA)) == AREA_RANDOM_DUNGEON ) {
-		if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 6 ) {
+		if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 6 ) {
 			snd SOUNDLIST_WRITE1
 			txtef COLOR_GREEN
 			txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-			cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+			cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 		}
 	}
 	if ( gdata(GDATA_AREA) == AREA_WILDERNESS ) {
-		if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 7 ) {
+		if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 7 ) {
 			snd SOUNDLIST_WRITE1
 			txtef COLOR_GREEN
 			txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-			cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+			cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 		}
 	}
 	if ( adata(ADATA_TYPE, gdata(GDATA_AREA)) != MAP_TYPE_WORLD & adata(ADATA_TYPE, gdata(GDATA_AREA)) != MAP_TYPE_LOCAL & gdata(GDATA_AREA) != AREA_SHOW_HOUSE ) {
@@ -3843,6 +3835,15 @@
 					flt
 					characreate -1, CREATURE_ID_BUG, -3, 0
 				loop
+			}
+		}
+		if ( gdata(GDATA_WEATHER) == WEATHER_HARD_RAIN ) {
+			if ( gdata(GDATA_WORLD) != AREA_AIMWELL & gdata(GDATA_WORLD) != AREA_OCEAN ) {
+				if ( rnd(2) == 0 ) {
+					flt
+					itemcreate -1, ITEM_ID_LIGHTNING_DISCHARGER, -1, -1, 0
+					inv(INV_ITEM_PROPERTY, ci) = PROP_NPC
+				}
 			}
 		}
 		if ( encounter == ENCOUNTER_ELEA_REPARATION ) {
@@ -11920,7 +11921,7 @@
 		}
 	}
 	if ( mdata(MDATA_TYPE) == MAP_TYPE_TOWN | gdata(GDATA_AREA) == AREA_HOME | mdata(MDATA_TYPE) == MAP_TYPE_VILLAGE ) {
-		if ( gdata(GDATA_TRAVEL_DISTANCE) >= 300 ) {
+		if ( gdata(GDATA_TRAVEL_DISTANCE) < -300 ) {
 			p = gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 - gdata(GDATA_TRAVEL_TIME)
 			txtmore
 			txt lang(cnvdate(gdata(GDATA_TRAVEL_TIME)) + "に" + mapname(gdata(GDATA_LAST_TOWN)) + "を発ってから、" + p / 24 + "日と" + p \ 24 + "時間の旅を終えた。", "" + p / 24 + " days and " + p \ 24 + " hours have passed since you left " + mapname(gdata(GDATA_LAST_TOWN)) + ".")

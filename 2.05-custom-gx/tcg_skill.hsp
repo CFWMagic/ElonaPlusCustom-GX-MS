@@ -125,6 +125,7 @@
 	aeft@tcg = cardstack@tcg(TCG_STACK_TARGET, stack@tcg)
 	aefp@tcg = cardstack@tcg(TCG_STACK_POWER, stack@tcg)
 	aite@tcg = cardstack@tcg(TCG_STACK_ITERATION, stack@tcg)
+	aeftg@tcg = cardstack@tcg(TCG_STACK_EFF_TRIGGER, stack@tcg)
 	proctcg "tcg effactivate: " + " stack:" + stack@tcg + " effect:" + aeff@tcg + " ac:" + ac@tcg + " act:" + act@tcg + " aeft:" + aeft@tcg + " aite:" + aite@tcg + " ap:" + ap@tcg
 	if ( ap@tcg != cp@tcg ) {
 		cpflip
@@ -284,6 +285,7 @@
 				proctcg "tcg proc/aftercombat/attacking: effac:" + attackingcard@tcg + "/eff:" + card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
 				effac@tcg = attackingcard@tcg
 				eff@tcg = card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
+				efftrigger@tcg = TCG_SKILL_TYPE_AFTERCOMBAT
 				gosub *card_action_choose_target
 			}
 		}
@@ -292,6 +294,7 @@
 				proctcg "tcg proc/aftercombat/attacked: effac:" + attacktarget@tcg + "/eff:" + card@tcg(TCG_CARD_EFFECT, attacktarget@tcg)
 				effac@tcg = attacktarget@tcg
 				eff@tcg = card@tcg(TCG_CARD_EFFECT, attacktarget@tcg)
+				efftrigger@tcg = TCG_SKILL_TYPE_AFTERCOMBAT
 				gosub *card_action_choose_target
 			}
 		}
@@ -301,6 +304,7 @@
 					proctcg "tcg proc/onkill/attacking: effac:" + attackingcard@tcg + "/eff:" + card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
 					effac@tcg = attackingcard@tcg
 					eff@tcg = card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
+					efftrigger@tcg = TCG_SKILL_TYPE_ONKILL
 					gosub *card_action_choose_target
 				}
 			}
@@ -311,6 +315,7 @@
 					proctcg "tcg proc/onkill/attacked: effac:" + attacktarget@tcg + "/eff:" + card@tcg(TCG_CARD_EFFECT, attacktarget@tcg)
 					effac@tcg = attacktarget@tcg
 					eff@tcg = card@tcg(TCG_CARD_EFFECT, attacktarget@tcg)
+					efftrigger@tcg = TCG_SKILL_TYPE_ONKILL
 					gosub *card_action_choose_target
 				}
 			}
@@ -320,6 +325,7 @@
 				proctcg "tcg proc/aftercombat/attacking: effac:" + attackingcard@tcg + "/eff:" + card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
 				effac@tcg = attackingcard@tcg
 				eff@tcg = card@tcg(TCG_CARD_EFFECT, attackingcard@tcg)
+				efftrigger@tcg = TCG_SKILL_TYPE_AFTERCOMBAT
 				gosub *card_action_choose_target
 			}
 		}
@@ -450,6 +456,7 @@
 				effref@tcg(TCG_SKILL_POWER, TCG_EFF_RYUTYE) = effref@tcg(TCG_SKILL_POWER, aefp@tcg)
 				effac@tcg = aeft@tcg
 				eff@tcg = aefp@tcg
+				efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 				gosub *card_action_choose_target
 				makecardlist
 				tcgdraw
@@ -530,6 +537,7 @@
 				if ( card@tcg(TCG_CARD_LOCATION, aeft@tcg) == TCG_LOCATION_FIELD ) {
 					effac@tcg = aeft@tcg
 					eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+					efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 					gosub *card_action_choose_target
 					makecardlist
 					tcgdraw
@@ -606,6 +614,7 @@
 				cpdata@tcg(TCG_PLAYER_MANA, aeft@tcg) = 0
 				effac@tcg = ac@tcg
 				eff@tcg = TCG_EFF_BATTLECRY_DEALEVERYONEXDAMAGE
+				efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 				gosub *card_action_choose_target
 			}
 			makecardlist
@@ -881,6 +890,16 @@
 			card@tcg(TCG_CARD_REF_COST, aeft@tcg) -= effref@tcg(TCG_SKILL_POWER, card@tcg(TCG_CARD_EFFECT, effac@tcg))
 			card@tcg(TCG_CARD_REF_COST, aeft@tcg) = limit(card@tcg(TCG_CARD_REF_COST, aeft@tcg), 0, TCG_STAT_MAX)
 			efllistadd 2, effref@tcg(TCG_SKILL_POWER, card@tcg(TCG_CARD_EFFECT, effac@tcg)), card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg), card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg)
+		}
+		goto *actionproc_SWEND1
+		_switch_sw@tcg++
+	}
+	if ( _switch_val@tcg == TCG_SKILL_EFF_ONGOING_GAINATTACKTOHP | _switch_sw@tcg ) {
+		_switch_sw@tcg = 0
+		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
+			if ( card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) < card@tcg(TCG_CARD_HP, aeft@tcg) ) {
+				card@tcg(TCG_CARD_ATTACK, aeft@tcg) += card@tcg(TCG_CARD_HP, aeft@tcg) - card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg)
+			}
 		}
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
@@ -1238,6 +1257,7 @@
 			gettargetcard aeft@tcg
 			effac@tcg = ac@tcg
 			eff@tcg = TCG_EFF_DEATHRATTLE_POISONRANDOMENEMY
+			efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 			gosub *card_action_choose_target
 			makecardlist
 			tcgdraw
@@ -1255,6 +1275,7 @@
 			gettargetcard aeft@tcg
 			effac@tcg = ac@tcg
 			eff@tcg = TCG_EFF_DEATHRATTLE_BLEEDRANDOMENEMY
+			efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 			gosub *card_action_choose_target
 			makecardlist
 			tcgdraw
@@ -1573,6 +1594,33 @@
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
 	}
+	if ( _switch_val@tcg == TCG_SKILL_EFF_GENERATETOFU | _switch_sw@tcg ) {
+		_switch_sw@tcg = 0
+		if ( (aeftg@tcg == TCG_SKILL_TYPE_BATTLECRY & aeft@tcg == ac@tcg) | (aeftg@tcg != TCG_SKILL_TYPE_BATTLECRY & aeft@tcg != ac@tcg) ) {
+			if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
+				if ( hasholdspace(card@tcg(TCG_CARD_CONTROLLER, ac@tcg)) ) {
+					create_extra_card card@tcg(TCG_CARD_CONTROLLER, ac@tcg), CREATURE_ID_KYU_BI
+					if ( cextra@tcg >= 0 ) {
+						card@tcg(TCG_CARD_COST, cextra@tcg) = card@tcg(TCG_CARD_REF_COST, aeft@tcg) / 2
+						card@tcg(TCG_CARD_REF_COST, cextra@tcg) = card@tcg(TCG_CARD_REF_COST, aeft@tcg) / 2
+						card@tcg(TCG_CARD_HP, cextra@tcg) = card@tcg(TCG_CARD_REF_HP, aeft@tcg) / 2
+						card@tcg(TCG_CARD_REF_HP, cextra@tcg) = card@tcg(TCG_CARD_REF_HP, aeft@tcg) / 2
+						card@tcg(TCG_CARD_ATTACK, cextra@tcg) = card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) / 2
+						card@tcg(TCG_CARD_REF_ATTACK, cextra@tcg) = card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) / 2
+						card@tcg(TCG_CARD_X, cextra@tcg) = card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg)
+						card@tcg(TCG_CARD_REF_PIC, cextra@tcg) = -33
+						card@tcg(TCG_CARD_REF_CHARA_PIC, cextra@tcg) = 0
+						cdbitmod TCG_BIT_FACE_UP, cextra@tcg, 1
+						card@tcg(TCG_CARD_EFFECT, cextra@tcg) = TCG_EFF_TOFU
+						carddetailneff@tcg(cextra@tcg) = "Fried Tofu  No.???   fried tofu  Rare:None\nEffect: Battlecry: Feed the Fried Tofu to 1 of your Card."
+						gettargetcard cextra@tcg
+					}
+				}
+			}
+		}
+		goto *actionproc_SWEND1
+		_switch_sw@tcg++
+	}
 	if ( _switch_val@tcg == TCG_SKILL_EFF_SPAGHET | _switch_sw@tcg ) {
 		_switch_sw@tcg = 0
 		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
@@ -1698,6 +1746,7 @@
 			if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 				effac@tcg = aeft@tcg
 				eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+				efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 				gosub *card_action_choose_target
 				makecardlist
 				tcgdraw
@@ -1808,6 +1857,35 @@
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
 	}
+	if ( _switch_val@tcg == TCG_SKILL_EFF_SPLITSELFNINJA | _switch_sw@tcg ) {
+		_switch_sw@tcg = 0
+		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
+			if ( aeftg@tcg == TCG_SKILL_TYPE_ONGOING ) {
+				if ( card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) == 0 ) {
+					card@tcg(TCG_CARD_ATTACK, aeft@tcg) = limit(card@tcg(TCG_CARD_ATTACK, aeft@tcg) + 1, 0, TCG_STAT_MAX)
+				}
+			} else {
+				if ( aeft@tcg == ac@tcg ) {
+					repeat limit(aefp@tcg, 0, 20)
+						if ( hasspotspace(card@tcg(TCG_CARD_CONTROLLER, aeft@tcg)) == TRUE ) {
+							create_extra_card card@tcg(TCG_CARD_CONTROLLER, aeft@tcg), card@tcg(TCG_CARD_REF_DBID, aeft@tcg)
+							if ( cextra@tcg >= 0 ) {
+								card@tcg(TCG_CARD_HP, cextra@tcg) = card@tcg(TCG_CARD_HP, aeft@tcg)
+								card@tcg(TCG_CARD_REF_HP, cextra@tcg) = card@tcg(TCG_CARD_REF_HP, aeft@tcg)
+								card@tcg(TCG_CARD_ATTACK, cextra@tcg) = 0
+								card@tcg(TCG_CARD_REF_ATTACK, cextra@tcg) = 0
+								effbk@tcg = card@tcg(TCG_CARD_EFFECT, cextra@tcg)
+								cdbitmod TCG_BIT_CONFUSED, cextra@tcg, 1
+								putcard cextra@tcg, card@tcg(TCG_CARD_CONTROLLER, cextra@tcg)
+							}
+						}
+					loop
+				}
+			}
+		}
+		goto *actionproc_SWEND1
+		_switch_sw@tcg++
+	}
 	if ( _switch_val@tcg == TCG_SKILL_EFF_SPLITSELFPOISONRANDOM | _switch_sw@tcg ) {
 		_switch_sw@tcg = 0
 		if ( ac@tcg >= 0 & ac@tcg < maxcard@tcg ) {
@@ -1825,6 +1903,7 @@
 			}
 			effac@tcg = ac@tcg
 			eff@tcg = TCG_EFF_DEATHRATTLE_POISONRANDOMENEMY
+			efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 			gosub *card_action_choose_target
 			makecardlist
 			tcgdraw
@@ -1849,6 +1928,7 @@
 			}
 			effac@tcg = ac@tcg
 			eff@tcg = TCG_EFF_DEATHRATTLE_BLEEDRANDOMENEMY
+			efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 			gosub *card_action_choose_target
 			makecardlist
 			tcgdraw
@@ -1875,6 +1955,7 @@
 						if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 							effac@tcg = aeft@tcg
 							eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+							efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 							if ( cancopyeffect(eff@tcg) ) {
 								gosub *card_action_choose_target
 								makecardlist
@@ -1893,6 +1974,7 @@
 		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
 			targetdeck@tcg = 0
 			gosub *card_filter_reset
+			if ( effref@tcg(TCG_SKILL_POWER, aeff@tcg) == TCG_SKILL_FILTER_LEGENDARY ) { rnddomain@tcg = 6 }
 			if ( effref@tcg(TCG_SKILL_POWER, aeff@tcg) == TCG_SKILL_FILTER_BLUE ) { rnddomain@tcg = 1 }
 			if ( effref@tcg(TCG_SKILL_POWER, aeff@tcg) == TCG_SKILL_FILTER_RAT ) { rndrace@tcg = "rat" }
 			if ( effref@tcg(TCG_SKILL_POWER, aeff@tcg) == TCG_SKILL_FILTER_MESHERA ) { rndrace@tcg = "bacteria" }
@@ -1941,6 +2023,7 @@
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 						effac@tcg = aeft@tcg
 						eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -2009,6 +2092,36 @@
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
 	}
+	if ( _switch_val@tcg == TCG_SKILL_EFF_MERGEANDGIVESTAT | _switch_sw@tcg ) {
+		_switch_sw@tcg = 0
+		if ( ac@tcg >= 0 & ac@tcg < maxcard@tcg ) {
+			if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
+				cdbitmod TCG_BIT_FACE_UP, ac@tcg, 1
+				card@tcg(TCG_CARD_LOCATION, ac@tcg) = TCG_LOCATION_FIELD
+				card@tcg(TCG_CARD_ANIM, ac@tcg) = 0, 0
+				card@tcg(TCG_CARD_X_MOVETO, ac@tcg) = card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg)
+				tcgpass 15
+				card@tcg(TCG_CARD_LOCATION, ac@tcg) = TCG_LOCATION_NONE
+				cdbitmod TCG_BIT_FACE_UP, ac@tcg, 0
+				card@tcg(TCG_CARD_REF_HP, aeft@tcg) += card@tcg(TCG_CARD_HP, ac@tcg)
+				card@tcg(TCG_CARD_HP, aeft@tcg) += card@tcg(TCG_CARD_HP, ac@tcg)
+				card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) += card@tcg(TCG_CARD_ATTACK, ac@tcg)
+				card@tcg(TCG_CARD_ATTACK, aeft@tcg) += card@tcg(TCG_CARD_ATTACK, ac@tcg)
+				if ( card@tcg(TCG_CARD_REF_DBID, aeft@tcg) == CREATURE_ID_KYU_BI ) {
+					card@tcg(TCG_CARD_REF_HP, aeft@tcg) += card@tcg(TCG_CARD_HP, ac@tcg)
+					card@tcg(TCG_CARD_HP, aeft@tcg) += card@tcg(TCG_CARD_HP, ac@tcg)
+					card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) += card@tcg(TCG_CARD_ATTACK, ac@tcg)
+					card@tcg(TCG_CARD_ATTACK, aeft@tcg) += card@tcg(TCG_CARD_ATTACK, ac@tcg)
+				}
+				efllistadd 2, 1, card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg), card@tcg(TCG_CARD_X, aeft@tcg), card@tcg(TCG_CARD_Y, aeft@tcg)
+				makecardlist
+				cardpos 0, -1
+				cardpos 1, -1
+			}
+		}
+		goto *actionproc_SWEND1
+		_switch_sw@tcg++
+	}
 	if ( _switch_val@tcg == TCG_SKILL_EFF_GAVELA | _switch_sw@tcg ) {
 		_switch_sw@tcg = 0
 		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
@@ -2039,6 +2152,7 @@
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 						effac@tcg = aeft@tcg
 						eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -2290,19 +2404,23 @@
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
 	}
-	if ( _switch_val@tcg == TCG_SKILL_EFF_PUT_CORGON_AND_CHANGEEFF | _switch_sw@tcg ) {
+	if ( _switch_val@tcg == TCG_SKILL_EFF_QURUIZA | _switch_sw@tcg ) {
 		_switch_sw@tcg = 0
 		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
-			if ( hasspotspace(card@tcg(TCG_CARD_CONTROLLER, ac@tcg)) == TRUE & card@tcg(TCG_CARD_LOCATION, aeft@tcg) != TCG_LOCATION_FIELD ) {
-				card@tcg(TCG_CARD_EFFECT, ac@tcg) = TCG_EFF_QURUIZA2
-				putcardfree@tcg = 1
-				putcard aeft@tcg, card@tcg(TCG_CARD_CONTROLLER, aeft@tcg)
-				makecardlist
-				tcgdraw
+			if ( aeftg@tcg == TCG_SKILL_TYPE_ONGOING ) {
+				card@tcg(TCG_CARD_COST, aeft@tcg) = limit(card@tcg(TCG_CARD_COST, aeft@tcg) - 1, 0, TCG_STAT_MAX)
+				card@tcg(TCG_CARD_ATTACK, aeft@tcg) = limit(card@tcg(TCG_CARD_ATTACK, aeft@tcg) + 2, 0, TCG_STAT_MAX)
+			} else {
+				if ( hasspotspace(card@tcg(TCG_CARD_CONTROLLER, ac@tcg)) == TRUE & card@tcg(TCG_CARD_LOCATION, aeft@tcg) != TCG_LOCATION_FIELD & card@tcg(TCG_CARD_REF_DBID, aeft@tcg) == CREATURE_ID_CORGON_THE_STEEL_DRAGON ) {
+					putcardfree@tcg = 1
+					putcard aeft@tcg, card@tcg(TCG_CARD_CONTROLLER, aeft@tcg)
+					makecardlist
+					tcgdraw
+				}
+				cardposhand 0, -1
+				cardposhand 1, -1
 			}
 		}
-		cardposhand 0, -1
-		cardposhand 1, -1
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
 	}
@@ -2964,6 +3082,7 @@
 			effref@tcg(TCG_SKILL_POWER, TCG_EFF_CLINGHOST11) += 1
 			effac@tcg = ac@tcg
 			eff@tcg = TCG_EFF_CLINGHOST11
+			efftrigger@tcg = TCG_SKILL_TYPE_DEATHRATTLE
 			gosub *card_action_choose_target
 			makecardlist
 			tcgdraw
@@ -3184,6 +3303,7 @@
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 						effac@tcg = aeft@tcg
 						eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -3230,6 +3350,7 @@
 						if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 							effac@tcg = aeft@tcg
 							eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+							efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 							if ( cancopyeffect(eff@tcg) ) {
 								gosub *card_action_choose_target
 								makecardlist
@@ -3256,6 +3377,7 @@
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 						effac@tcg = aeft@tcg
 						eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -3324,6 +3446,7 @@
 				}
 				if ( card@tcg(TCG_CARD_LOCATION, aeft@tcg) == TCG_LOCATION_FIELD ) {
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -3339,6 +3462,7 @@
 						if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 							effac@tcg = aeft@tcg
 							eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+							efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 							if ( cancopyeffect(eff@tcg) ) {
 								gosub *card_action_choose_target
 								makecardlist
@@ -3351,6 +3475,7 @@
 				if ( evtarget@tcg == -3 ) {
 					effac@tcg = aeft@tcg
 					eff@tcg = TCG_EFF_DEATHRATTLE_DRAW3CARD
+					efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 					carddetailn@tcg(aeft@tcg) = effdescbk@tcg
 					card@tcg(TCG_CARD_TURN_COUNT, aeft@tcg) = turncountbk@tcg
 					card@tcg(TCG_CARD_REF_DBID, aeft@tcg) = CREATURE_ID_PAELS_MOM_LILY
@@ -3373,6 +3498,7 @@
 				if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 					effac@tcg = ac@tcg
 					eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+					efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 					if ( cancopyeffect(eff@tcg) ) {
 						gosub *card_action_choose_target
 						makecardlist
@@ -3391,6 +3517,7 @@
 				if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_DEATHRATTLE ) ) {
 					effac@tcg = aeft@tcg
 					eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+					efftrigger@tcg = TCG_SKILL_TYPE_DEATHRATTLE
 					if ( cancopyeffect(eff@tcg) ) {
 						gosub *card_action_choose_target
 						makecardlist
@@ -3412,6 +3539,7 @@
 					if ( (effref@tcg(TCG_SKILL_TYPE, card@tcg(TCG_CARD_EFFECT, aeft@tcg)) & TCG_SKILL_TYPE_BATTLECRY) ) {
 						effac@tcg = ac@tcg
 						eff@tcg = card@tcg(TCG_CARD_EFFECT, aeft@tcg)
+						efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 						if ( cancopyeffect(eff@tcg) ) {
 							gosub *card_action_choose_target
 							makecardlist
@@ -3454,6 +3582,141 @@
 					reconstruct_card_text cnt
 				}
 			loop
+		}
+		goto *actionproc_SWEND1
+		_switch_sw@tcg++
+	}
+	if ( _switch_val@tcg == TCG_SKILL_EFF_POKER | _switch_sw@tcg ) {
+		_switch_sw@tcg = 0
+		if ( aeft@tcg >= 0 & aeft@tcg < maxcard@tcg ) {
+			pokersuit@tcg = limit(1131 - card@tcg(TCG_CARD_REF_DBID, aeft@tcg), 1, 4)
+			pokerplayer@tcg = limit(card@tcg(TCG_CARD_CONTROLLER, aeft@tcg), 0, 1)
+			pokerrank@tcg = rnd(13)
+			repeat 13
+				if ( pokerrankused@tcg(1 + pokerrank@tcg + pokersuit@tcg * 20 + pokerplayer@tcg * 100) == 0 ) { break }
+				pokerrank@tcg = (pokerrank@tcg + 1) \ 13
+			loop
+			pokerrankused@tcg(1 + pokerrank@tcg + pokersuit@tcg * 20 + pokerplayer@tcg * 100) = 1
+			pokerrank@tcg += 1
+			cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "" + pokerrank@tcg
+			if ( pokerrank@tcg == 1 ) {
+				carddetailneff@tcg(aeft@tcg) = "ace of " + carddetailneff@tcg(aeft@tcg)
+				cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "A"
+			}
+			if ( pokerrank@tcg > 1 & pokerrank@tcg <= 10 ) {
+				carddetailneff@tcg(aeft@tcg) = "" + pokerrank@tcg + " of " + carddetailneff@tcg(aeft@tcg)
+			}
+			if ( pokerrank@tcg == 11 ) {
+				carddetailneff@tcg(aeft@tcg) = "jack of " + carddetailneff@tcg(aeft@tcg)
+				cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "J"
+			}
+			if ( pokerrank@tcg == 12 ) {
+				carddetailneff@tcg(aeft@tcg) = "queen of " + carddetailneff@tcg(aeft@tcg)
+				cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "Q"
+			}
+			if ( pokerrank@tcg == 13 ) {
+				carddetailneff@tcg(aeft@tcg) = "king of " + carddetailneff@tcg(aeft@tcg)
+				cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "K"
+			}
+			if ( pokersuit@tcg <= 2 ) {
+				cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg) = "-" + cardn@tcg(TCG_CARDN_REF_TAG, aeft@tcg)
+			}
+			if ( pokerrank@tcg > 5 & pokerrank@tcg <= 10 ) {
+				card@tcg(TCG_CARD_REF_PIC, aeft@tcg) += 33
+			}
+			if ( pokerrank@tcg > 10 ) {
+				card@tcg(TCG_CARD_REF_PIC, aeft@tcg) += 1
+			}
+			card@tcg(TCG_CARD_REF_COST, aeft@tcg) = (pokerrank@tcg + 1) / 2
+			card@tcg(TCG_CARD_COST, aeft@tcg) = (pokerrank@tcg + 1) / 2
+			card@tcg(TCG_CARD_REF_HP, aeft@tcg) = (pokerrank@tcg + 1) / 2 + 1
+			card@tcg(TCG_CARD_HP, aeft@tcg) = (pokerrank@tcg + 1) / 2 + 1
+			card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) = (pokerrank@tcg + 1) / 2
+			card@tcg(TCG_CARD_ATTACK, aeft@tcg) = (pokerrank@tcg + 1) / 2
+			if ( pokersuit@tcg == 1 ) { // Heart
+				card@tcg(TCG_CARD_REF_HP, aeft@tcg) += 1
+				card@tcg(TCG_CARD_HP, aeft@tcg) += 1
+				if ( pokerrank@tcg == 1 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_SACRIFICE_HEALTARGET }
+				if ( pokerrank@tcg == 2 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_HEALPLAYER2DAMAGE }
+				if ( pokerrank@tcg == 3 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_NURSE2 }
+				if ( pokerrank@tcg == 4 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_NURSE1 }
+				if ( pokerrank@tcg == 5 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_TURN_START_HEALPLAYER2DAMAGE }
+				if ( pokerrank@tcg == 6 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_HEALPLAYER6DAMAGE }
+				if ( pokerrank@tcg == 7 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_4MANA77CONVERTION }
+				if ( pokerrank@tcg == 8 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_SIST }
+				if ( pokerrank@tcg == 9 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_TURN_START_HEALPLAYER5DAMAGE }
+				if ( pokerrank@tcg == 10 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_BOUNCEALOT }
+				if ( pokerrank@tcg == 11 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_GILPHEM }
+				if ( pokerrank@tcg == 12 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_PROVIDENCE }
+				if ( pokerrank@tcg == 13 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_SERAPH }
+			}
+			if ( pokersuit@tcg == 2 ) { // Diamond
+				card@tcg(TCG_CARD_REF_COST, aeft@tcg) -= 1
+				card@tcg(TCG_CARD_COST, aeft@tcg) -= 1
+				card@tcg(TCG_CARD_REF_HP, aeft@tcg) -= 1
+				card@tcg(TCG_CARD_HP, aeft@tcg) -= 1
+				if ( pokerrank@tcg == 1 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_LUNE }
+				if ( pokerrank@tcg == 2 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_SEARCHDECKFOR1COST2CARD }
+				if ( pokerrank@tcg == 3 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_SEARCHDECKFOR1COST3CARD }
+				if ( pokerrank@tcg == 4 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_SEARCHDECKFOR1COST4CARD }
+				if ( pokerrank@tcg == 5 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_SEARCHDECKFOR1COST5CARD }
+				if ( pokerrank@tcg == 6 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DRAW2OPPONENTCARD }
+				if ( pokerrank@tcg == 7 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_TURN_START_DRAW1CARD }
+				if ( pokerrank@tcg == 8 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_DISCOVER8 }
+				if ( pokerrank@tcg == 9 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BLACKCAT }
+				if ( pokerrank@tcg == 10 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_EXILE }
+				if ( pokerrank@tcg == 11 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_DUNGEONCLEANER }
+				if ( pokerrank@tcg == 12 ) { 
+					card@tcg(TCG_CARD_REF_COST, aeft@tcg) += 3
+					card@tcg(TCG_CARD_COST, aeft@tcg) += 3
+					card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_OLDHUMAN 
+				}
+				if ( pokerrank@tcg == 13 ) { 
+					cdbitmod TCG_BIT_TEMPO, aeft@tcg, 1
+					card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_OLDBELL 
+				}
+			}
+			if ( pokersuit@tcg == 3 ) { // Club
+				card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) += 1
+				card@tcg(TCG_CARD_ATTACK, aeft@tcg) += 1
+				if ( pokerrank@tcg == 1 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_WEAKENALLENEMY }
+				if ( pokerrank@tcg == 2 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_TURN_START_DEBUFFRANDOMENEMY }
+				if ( pokerrank@tcg == 3 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_PERFORMAIDDESWEEPER }
+				if ( pokerrank@tcg == 4 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_PERFORMAIDCOCRUEL }
+				if ( pokerrank@tcg == 5 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEBUFFALLENEMY }
+				if ( pokerrank@tcg == 6 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEBUFFALLENEMYHAND }
+				if ( pokerrank@tcg == 7 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_TURN_START_PARALYSERANDOMENEMY }
+				if ( pokerrank@tcg == 8 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_MOYER }
+				if ( pokerrank@tcg == 9 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_OBLIVIONBEAST2 }
+				if ( pokerrank@tcg == 10 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BLAZELION }
+				if ( pokerrank@tcg == 11 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_YOUNGLADYBLACK }
+				if ( pokerrank@tcg == 12 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_SHELLKING }
+				if ( pokerrank@tcg == 13 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_DARKDOME }
+			}
+			if ( pokersuit@tcg == 4 ) { // Spade
+				card@tcg(TCG_CARD_REF_ATTACK, aeft@tcg) += 2
+				card@tcg(TCG_CARD_ATTACK, aeft@tcg) += 2
+				card@tcg(TCG_CARD_REF_HP, aeft@tcg) -= 1
+				card@tcg(TCG_CARD_HP, aeft@tcg) -= 1
+				if ( pokerrank@tcg == 1 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_PARALYSECHOSENENEMY }
+				if ( pokerrank@tcg == 2 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEALOPPONENT2DAMAGE }
+				if ( pokerrank@tcg == 3 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEALOPPONENT3DAMAGE }
+				if ( pokerrank@tcg == 4 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEALOPPONENT4DAMAGE }
+				if ( pokerrank@tcg == 5 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_MUTANT }
+				if ( pokerrank@tcg == 6 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEALRANDOMENEMY6DAMAGE }
+				if ( pokerrank@tcg == 7 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BLACKANGEL }
+				if ( pokerrank@tcg == 8 ) { 
+					card@tcg(TCG_CARD_REF_COST, aeft@tcg) += 3
+					card@tcg(TCG_CARD_COST, aeft@tcg) += 3
+					card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_HUNGRYSEALION 
+				}
+				if ( pokerrank@tcg == 9 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_LEIKI }
+				if ( pokerrank@tcg == 10 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_AFTERCOMBAT_DEALENEMY3DAMAGE }
+				if ( pokerrank@tcg == 11 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DEALALLENEMY2DAMAGE }
+				if ( pokerrank@tcg == 12 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_BATTLECRY_DESTROYCHOSENENEMY }
+				if ( pokerrank@tcg == 13 ) { card@tcg(TCG_CARD_EFFECT, aeft@tcg) = TCG_EFF_KARATA }
+			}
+			reconstruct_card_text aeft@tcg
 		}
 		goto *actionproc_SWEND1
 		_switch_sw@tcg++
@@ -4022,6 +4285,7 @@
 			if ( getspotsum(aeft@tcg) == 1 ) {
 				effac@tcg = ac@tcg
 				eff@tcg = TCG_EFF_DARKARTIFICIALGIANT
+				efftrigger@tcg = TCG_SKILL_TYPE_BATTLECRY
 				gosub *card_action_choose_target
 			}
 		}

@@ -146,10 +146,12 @@
 	if ( cdata(CDATA_RELATION, tc) <= (-1) ) {
 		if ( evnum == 0 ) {
 			if ( TweakData(TWEAK_GAMEPLAY_DISABLE_HARVEST_MOON_RANCH, TWEAK_CATEGORY_GAMEPLAY) == TRUE | cbit(CHARA_BIT_LIVESTOCK, tc) != 1 ) {
-				txt lang(name(tc) + "は耳を貸さない。", name(tc) + " won't listen.")
-				questteleport = 0
-				gosub *screen_draw
-				return
+				if ( cbit(CHARA_BIT_BEGGING_FOR_LIFE, tc) != TRUE ) {
+					txt lang(name(tc) + "は耳を貸さない。", name(tc) + " won't listen.")
+					questteleport = 0
+					gosub *screen_draw
+					return
+				}
 			}
 		}
 	}
@@ -244,11 +246,11 @@
 		}
 	}
 	kaiwaev = 0
-	if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 3 ) {
+	if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 3 ) {
 		snd SOUNDLIST_WRITE1
 		txtef COLOR_GREEN
 		txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-		cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+		cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 	}
 	if ( cdata(CDATA_ID, tc) == CREATURE_ID_ALFRED_THE_CANGNAN_WIND & gdata(GDATA_AREA) == AREA_CHAOS_CRADLE & gdata(GDATA_LEVEL) == 173 & cdata(CDATA_ALLIED, tc) == 0 ) {
 		chatMore lang("誰…ですか…貴方…は？", "W-Who... who are you?")
@@ -490,11 +492,11 @@
 			txtmore
 			chatc@DP = tc
 			txt lang("「うぃっ！」", "*Hic*"), lang("「うまいぜ」", cnvtalk("Ah, good booze.")), lang("「らららー♪」", cnvtalk("La-la-la-la.")), lang("「ひっく」", cnvtalk("I'm going to heaven.")), lang("「ふぅ」", cnvtalk("Whew!")), lang("「たまらないわ」", cnvtalk("I'm revived!")), lang("「んまっ♪」", cnvtalk("Awesome."))
-			if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 1 ) {
+			if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 1 ) {
 				snd SOUNDLIST_WRITE1
 				txtef COLOR_GREEN
 				txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-				cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+				cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 			}
 			dmgcon tc, CONDITION_DRUNK, 1000
 			dmgcon cc, CONDITION_DRUNK, 1000
@@ -5653,10 +5655,10 @@
 		}
 		if ( gdata(GDATA_WORLD) == AREA_OCEAN ) {
 			seikou = 75 - enemyhp * enemyhp * 2
-			if ( cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
+			if ( cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
 				chatList 2, lang("船をぶつけて飛び移る（成功率:" + seikou + "％）", "(Ram your ship and get in) (success rate:" + seikou + "%)")
 			}
-			if ( cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
+			if ( cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
 				if ( gdata(GDATA_FLAG_SHIP_TYPE) == 3 | gdata(GDATA_FLAG_SHIP_TYPE) >= 5 ) {
 					chatList 3, lang("遠距離から船を攻撃する", "(Attack from a distance)")
 				}
@@ -5722,7 +5724,7 @@
 			else {
 				snd SOUNDLIST_CRUSH1
 				enemyhp--
-				cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER)--
+				cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER)--
 				txtef COLOR_RED
 				txt lang("船のぶつけかたが悪く、飛び移るのに失敗した…。", "Your ship is rammed badly, and you failed to jump over...")
 				if ( enemyhp <= 0 ) {
@@ -5767,7 +5769,7 @@
 			}
 			if ( rnd(2) == 0 ) {
 				snd SOUNDLIST_BALL1
-				cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER)--
+				cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER)--
 				chatMore lang("いい加減に" + _siro(3) + "！こっちも反撃" + _da(2), "Avast! We be retaliating!"), strmore
 				goto *chat_unique
 			}
@@ -5775,8 +5777,8 @@
 		}
 		if ( chatval == 4 ) {
 			snd SOUNDLIST_BALL1
-			if ( cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
-				cdata(CDATA_CHARACTER_TIER, CHARA_PLAYER)--
+			if ( cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER) > CHARACTER_TIER_SHIP_HULL_MIN ) {
+				cdata(CDATA_SHIP_HULL_HP, CHARA_PLAYER)--
 			}
 			decfame CHARA_PLAYER, 40
 			p = stat
@@ -6562,10 +6564,10 @@
 		if ( cdata(CDATA_GOLD, CHARA_PLAYER) >= 10000 ) {
 			chatlist 3, lang("金貨10000枚お布施する", "I want to donate 10,000 gold.")
 		}
-		if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) <= 0 ) {
+		if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) <= 0 ) {
 			chatlist 4, lang("姉になりたい", "I want to be an older sister.")
 		}
-		if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) > 0 ) {
+		if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) > 0 ) {
 			chatlist 5, lang("もっと立派な姉になりたい", "I want to be a better older sister.")
 		}
 		buff = lang("姉波動とは言わば宇宙の原理！波動の形でありとあらゆる物の中に偏在している。だから、" + cdatan(CDATAN_NAME, CHARA_PLAYER) + "も身を委ねればとても簡単に…そうさ、魂レベルで簡単に感じ取れるはずだ。さらに最新の研究では姉波動は健康にもいいし鬱にも一定の効果があることが分かっている。人類はもっと多くの姉波動を浴びるべきなんだ！", "Sistergy is, so to speak, one of the fundamental elements of the universe! It is ubiquitous in all things in the form of waves. So, if you surrender yourself completely, " + cdatan(CDATAN_NAME, CHARA_PLAYER) + ", you will be able to feel them very easily... down to the level of your soul. Furthermore, the latest research has shown that Sistergy waves are good for one's health and have measurable effects on depression. Humanity should be exposed to more Sistergy waves!")
@@ -6609,50 +6611,50 @@
 				txtef COLOR_YELLOW
 				txt lang("あなたは「" + skillname(SKILL_SPACT_EYE_OF_ANE) + "」の能力を得た。", "You have learned new ability, " + skillname(SKILL_SPACT_EYE_OF_ANE) + ".")
 			}
-			cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) = 1
+			cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) = 1
 			goto *chat_end
 		}
 		if ( chatval == 5 ) {
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 0 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 0 ) {
 				anetype = lang("お姉ちゃん", "big sister")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 1 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 1 ) {
 				anetype = lang("お姉ちゃま", "sister")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 2 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 2 ) {
 				anetype = lang("あねぇ", "big sis")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 3 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 3 ) {
 				anetype = lang("お姉様", "dear sister")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 4 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 4 ) {
 				anetype = lang("おねえたま", "sis-sis")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 5 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 5 ) {
 				anetype = lang("姉上様", "sister mine")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 6 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 6 ) {
 				anetype = lang("ねえさま", "elder sister")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 7 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 7 ) {
 				anetype = lang("アネキ", "sis")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 8 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 8 ) {
 				anetype = lang("姉さん", "sister darling")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 9 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 9 ) {
 				anetype = lang("姉君さま", "beloved sister")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 10 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 10 ) {
 				anetype = lang("姉チャマ", "sister dearest")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 11 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 11 ) {
 				anetype = lang("姉や", "grande soeur")
 			}
-			if ( cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) \ 13 == 12 ) {
+			if ( cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) \ 13 == 12 ) {
 				anetype = lang("ねえちゃん", "ane")
 			}
-			anelv = cdata(CDATA_MATERIAL3_COUNTER, CHARA_PLAYER) / 13 + 1
+			anelv = cdata(CDATA_SISTER_ENERGY_TYPE, CHARA_PLAYER) / 13 + 1
 			chatMore lang("ふむ…" + cdatan(CDATAN_NAME, CHARA_PLAYER) + "の姉波動は" + anetype + "属性で、現在レベル" + anelv + "といったところだな。", "Hmm... your Sistergy power is Lv" + anelv + " and your attribute is \"" + anetype + "\"-type!")
 			if ( anelv <= 70 ) {
 				chatMore lang("…そんな顔をするな。不安だろうが、" + cdatan(CDATAN_NAME, CHARA_PLAYER) + "なら焦らず修練していけばきっと立派な姉になれるさ。", "...Do not fret. You may be worried, but if you take your time and focus on your studies, I am sure you will become a worthy elder sister."), strquestion
@@ -13931,7 +13933,7 @@
 			gdata(GDATA_FLAG_TRAINING_COURSE_STATE)++
 		}
 		if ( chatval == 2 ) {
-			chatMore lang("料理スキルがあるなら、調理器具を使うことで料理ができます。料理すると、腐るまでのタイムリミットと心身を鍛える効果が大幅に伸びるので、できるようになっておきたいですね。腐ったもので料理の練習をしてもいいでしょう。調理器具によって、どこまでの料理を作れるか限界があるので一度道具説明欄を見て下さい。", "If you have the Cooking skill, you can cook using cooking utensils. Cooked food decays much more slowly and strengthens you more, so it's a useful skill. Depending on the cooking utensils, there is a limit to how good of a dish you can make, so use [X] to examine them.")
+			chatMore lang("料理スキルがあるなら、調理器具を使うことで料理ができます。料理すると、腐るまでのタイムリミットと心身を鍛える効果が大幅に伸びるので、できるようになっておきたいですね。料理の達人になれば、ひとつの素材から複数の料理を作ることができます。腐ったものも料理の練習台にするくらいの気持ちで頑張りましょう。調理器具によって、どこまでの料理を作れるか限界があるので一度道具説明欄を見て下さい。", "If you have the Cooking skill, you can cook using cooking utensils. Cooked food decays much more slowly and strengthens you more, so it's a useful skill. Depending on the cooking utensils, there is a limit to how good of a dish you can make, so use [X] to examine them.")
 			chatMore lang("料理とは少し違うけれど、ミキサーを使えば野菜や果物をジュースにすることもできますよ。お腹はあまり膨れませんが、その分多く栄養を摂取できます。呪われていたり腐っている物でも無害化して有効活用できます。", "It's a little different from cooking, but you can also turn fruits and vegetables into juice with a juice mixer. Although they aren't particularly filling, they're still nutritious. Even cursed or rotten things can be made into juice without any problems.")
 			gdata(GDATA_FLAG_TRAINING_COURSE_STATE)++
 		}
@@ -15487,13 +15489,13 @@
 			goto *chat_end
 		}
 		if ( chatval == 2 ) {
-			if ( gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 < cdata(CDATA_MATERIAL1_COUNTER, tc) ) {
+			if ( gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 < cdata(CDATA_RENT_REFRESH, tc) ) {
 				snd SOUNDLIST_FAIL1
-				txt lang("次に徴収できるのは" + cnvdate(cdata(CDATA_MATERIAL1_COUNTER, tc), 1) + "だ。", "The next time is " + cnvdate(cdata(CDATA_MATERIAL1_COUNTER, tc), 1) + ".")
+				txt lang("次に徴収できるのは" + cnvdate(cdata(CDATA_RENT_REFRESH, tc), 1) + "だ。", "The next time is " + cnvdate(cdata(CDATA_RENT_REFRESH, tc), 1) + ".")
 				goto *chat_end
 			}
 			chatMore lang("まぁ、気づかずにすみません。こちらを受け取ってください。娘たちと一緒に作ったんですよ。", "Oh, that's right. Sorry for falling behind. Please take these - I made them together with my daughters.")
-			cdata(CDATA_MATERIAL1_COUNTER, tc) = gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 + 24 * 30
+			cdata(CDATA_RENT_REFRESH, tc) = gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 + 24 * 30
 			txt_questitem
 			flt
 			itemcreate -1, ITEM_ID_GOLDEN_MEAD, cdata(CDATA_X, CHARA_PLAYER), cdata(CDATA_Y, CHARA_PLAYER), 4
@@ -15520,13 +15522,13 @@
 			goto *chat_end
 		}
 		if ( chatval == 2 ) {
-			if ( gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 < cdata(CDATA_MATERIAL1_COUNTER, tc) ) {
+			if ( gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 < cdata(CDATA_RENT_REFRESH, tc) ) {
 				snd SOUNDLIST_FAIL1
-				txt lang("次に徴収できるのは" + cnvdate(cdata(CDATA_MATERIAL1_COUNTER, tc), 1) + "だ。", "The next time is " + cnvdate(cdata(CDATA_MATERIAL1_COUNTER, tc), 1) + ".")
+				txt lang("次に徴収できるのは" + cnvdate(cdata(CDATA_RENT_REFRESH, tc), 1) + "だ。", "The next time is " + cnvdate(cdata(CDATA_RENT_REFRESH, tc), 1) + ".")
 				goto *chat_end
 			}
 			chatMore lang("あっ、はい。", "Ah, right.")
-			cdata(CDATA_MATERIAL1_COUNTER, tc) = gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 + 24 * 30
+			cdata(CDATA_RENT_REFRESH, tc) = gdata(GDATA_HOUR) + gdata(GDATA_DAY) * 24 + gdata(GDATA_MONTH) * 24 * 30 + gdata(GDATA_YEAR) * 24 * 30 * 12 + 24 * 30
 			txt_questitem
 			if ( gdata(GDATA_MONTH) == 1 ) {
 				flt
@@ -15594,8 +15596,40 @@
 	}
 	if ( _switch_val == CREATURE_ID_TALKA_THE_LONG_TWINTAIL | _switch_sw ) {
 		_switch_sw = 0
-		chatMore lang("なんですか、ジロジロと…わたしの顔に何かついてます？", "under development!"), strbye
+		chatMore lang("なんですか、ジロジロと…わたしの顔に何かついてます？", "Wha.. why are you staring at me... is there something weird on my face?"), strbye
 		goto *chat_end
+	}
+	if ( _switch_val == CREATURE_ID_KYU_BI | _switch_sw ) {
+		_switch_sw = 0
+		chatMore lang("この街が人狼どもの餌場になるくらいなら、狐に支配されたほうが幸せじゃろう？", "Wouldn't it be better for this town to be ruled by foxes than to become a feeding ground for werewolves?"), strmore
+		item_find ITEM_ID_FRIED_TOFU, ITEM_FIND_MODE_DBID, ITEM_FIND_LOCATION_CHARAS
+		if ( stat != (-1) ) {
+			ci = stat
+			if ( inv(INV_ITEM_NUM, ci) >= 1 ) {
+				chatList 1, lang("油揚げをお供えする", "Here, have some fried tofu.")
+			}
+		}
+		chatList 0, lang("今度持ってきます", "I'll bring it next time.")
+		buff = lang("この街はわしの支配下にあるぞ。ほれほれ、崇め奉るがよい。そして、わしに油揚げを献上するのじゃ。", "This city is under my control. Come on, worship me. Gimme some fried tofu.")
+		gosub *chat_select
+		if ( chatval == 1 ) {
+			snd SOUNDLIST_DROP1
+			inv(INV_ITEM_NUM, ci) -= 1
+			chatMore lang("やったぁー！…コホン。褒美をくれてやろう、有効活用するがよい。そして、油揚げを手に入れたらまた献上するのじゃ。", "Yay!...Oops. Offer it to me as many times as you like. I'll give you a reward, so make good use of it. Return to me when you've got more tofu in your pockets."), strbye
+			txt lang("何かが足元に転がってきた。", "Something is put on the ground.")
+			flt
+			itemcreate -1, ITEM_ID_ECHINOBOX, cdata(CDATA_X, CHARA_PLAYER), cdata(CDATA_Y, CHARA_PLAYER), 0
+			inv(INV_ITEM_STATUS, ci) = ITEM_STATUS_NORMAL
+			cdata(CDATA_EMO_ICON, tc) = 6 + 100 * 3
+			goto *chat_end
+		}
+		else {
+			chatMore lang("用意の悪いやつじゃのう。油揚げを常備しておらんのか？", "Ah, what a pity. It's common sense to have tofus in your pockets you know?"), strbye
+			goto *chat_end
+		}
+		goto *chat_end
+		goto *chat_unique_SWEND1
+		_switch_sw++
 	}
 	if ( _switch_val == CREATURE_ID_BOYCIANA | _switch_sw ) {
 		_switch_sw = 0
@@ -15726,8 +15760,8 @@
 			if ( cdata(CDATA_MP, CHARA_PLAYER) < gdata(GDATA_FLAG_COLLECTED_WISHES) ) {
 				cdata(CDATA_MP, CHARA_PLAYER) = gdata(GDATA_FLAG_COLLECTED_WISHES)
 			}
-			if ( cdata(CDATA_SP, CHARA_PLAYER) < gdata(GDATA_FLAG_COLLECTED_WISHES) ) {
-				cdata(CDATA_SP, CHARA_PLAYER) = gdata(GDATA_FLAG_COLLECTED_WISHES)
+			if ( cdata(CDATA_SP, CHARA_PLAYER) < gdata(GDATA_FLAG_COLLECTED_WISHES) + 50 ) {
+				cdata(CDATA_SP, CHARA_PLAYER) = gdata(GDATA_FLAG_COLLECTED_WISHES) + 50
 			}
 			cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) = 200
 			if ( cdata(CDATA_HUNGER, CHARA_PLAYER) < 9000 ) {
@@ -19175,13 +19209,15 @@
 					if ( cbit(CHARA_BIT_NECRO, tc) == 0 ) {
 						if ( cbit(CHARA_BIT_LIVESTOCK, tc) == 0 ) {
 							if ( cdata(CDATA_HUNGER, CHARA_PLAYER) <= 10000 & cdata(CDATA_HUNGER, tc) <= 10000 & cdata(CDATA_IMPRESSION, tc) >= 100 & cbit(CHARA_BIT_ANOREXIA, tc) != TRUE & cbit(CHARA_BIT_ANOREXIA, CHARA_PLAYER) != TRUE ) {
-								chatList 84, lang("一緒に食事する[総経験値200％・満腹度増加量半減]", "Let's have a meal together. [Total EXP 200%, Satiety increase halved]")
+								// chatList 84, lang("一緒に食事する[総経験値200％・満腹度増加量半減]", "Let's have a meal together. [Total EXP 200%, Satiety increase halved]")
+								chatList 84, lang("一緒に食事する[総経験値200％・満腹度増加量半減]", "Let's have a meal together.")
 							}
 							if ( cdata(CDATA_IN_TAGTEAM, tc) != 0 ) {
 								ttc = cdata(CDATA_TAGTEAM_PARTNER, tc)
 								if ( ttc != 0 ) {
 									if ( cdata(CDATA_HUNGER, ttc) <= 10000 & cdata(CDATA_HUNGER, tc) <= 10000 & cdata(CDATA_IMPRESSION, ttc) >= 100 & cdata(CDATA_IMPRESSION, tc) >= 100 & cbit(CHARA_BIT_ANOREXIA, tc) != TRUE & cbit(CHARA_BIT_ANOREXIA, ttc) != TRUE ) {
-										chatList 142, lang("タッグで食事させる[総経験値200％・満腹度増加量半減]", "Go have a meal with your tag partner.[Total-EXP 200%, Satiety increase halved]")
+										// chatList 142, lang("タッグで食事させる[総経験値200％・満腹度増加量半減]", "Have a meal with your tag partner.[Total-EXP 200%, Satiety increase halved]")
+										chatList 142, lang("タッグで食事させる[総経験値200％・満腹度増加量半減]", "Have a meal with your tag partner.")
 									}
 								}
 							}
@@ -19281,23 +19317,23 @@
 							if ( cdata(CDATA_IN_TAGTEAM, tc) != 0 ) {
 								ttc = cdata(CDATA_TAGTEAM_PARTNER, tc)
 								if ( ttc != 0 ) {
-									chatList 110, lang("タッグ間のやりとりを見る", "Talk to your tag team partner.")
+									chatList 110, lang("タッグ間のやりとりを見る", "Talk to your tag partner.")
 								}
  							}
 							if ( cdata(CDATA_PRECIOUS_ALLY, tc) == 0 ) {
-								chatList 67, lang("大事な仲間に指定", "Designate as a precious ally.")
+								chatList 67, lang("大事な仲間に指定", "Designate as precious ally.")
 							}
 							if ( cdata(CDATA_PRECIOUS_ALLY, tc) != 0 ) {
 								chatList 68, lang("大事な仲間指定を解除", "Cancel precious ally status.")
 							}
 							if ( cbit(CHARA_BIT_PROHIBIT_PICKING_UP_ITEMS, tc) != TRUE ) {
-								chatList 71, lang("足元のアイテム我慢", "Don't pick up items off the ground.")
+								chatList 71, lang("足元のアイテム我慢", "Don't pick up items.")
 							}
 							if ( cbit(CHARA_BIT_PROHIBIT_PICKING_UP_ITEMS, tc) == TRUE ) {
-								chatList 72, lang("アイテム我慢解除", "Do as you like with items on the ground.")
+								chatList 72, lang("アイテム我慢解除", "Pick up items freely.")
 							}
 							if ( cdata(CDATA_MASTER_SERVANT, tc) >= 150 ) {
-								chatList 94, lang("特殊指示を出す", "Give special instructions.")
+								chatList 94, lang("特殊指示を出す", "Special instructions.")
 							}
 
 			                /********** ORIGINAL 1.90 - BEGINNING ********** // Replaced with the confession mechanic in stock 2.05.
@@ -19546,6 +19582,16 @@
 				}
 			}
 		}
+	}
+	if ( cbit(CHARA_BIT_BEGGING_FOR_LIFE, tc) == TRUE ) {
+		chatList 149, lang("餌付けする", "I'll give you something delicious.")
+		chatList 150, lang("高速で屈伸しながら煽る", "You are such a wimp!")
+		chatList 151, lang("同胞と殺し合え", "Kill your fellow friends!")
+		chatList 144, lang("カツアゲする", "Leave your money behind!")
+		chatList 145, lang("激しく気持ちいいことさせろ", "Make me feel good...")
+		chatList 146, lang("トドメを刺す", "I'll let you die without pain!")
+		chatList 147, lang("見逃してやる", "I forgive you...")
+		chatList 148, lang("見逃してやるフリをしてトドメを刺す", "I forgive you...It's a lie!")
 	}
 	if ( cdata(CDATA_ID, tc) == CREATURE_ID_DETECTIVE | cdata(CDATA_ID, tc) == CREATURE_ID_WEREWOLF_DETECTIVE ) {
 		if ( tc > MAX_CHARA_FOLLOWER ) {
@@ -19821,11 +19867,11 @@
 		snd SOUNDLIST_PAYGOLD1
 		cdata(CDATA_GOLD, CHARA_PLAYER) -= calcmealvalued()
 		snd SOUNDLIST_DRINK1
-		if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 1 ) {
+		if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 1 ) {
 			snd SOUNDLIST_WRITE1
 			txtef COLOR_GREEN
 			txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-			cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+			cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 		}
 		if ( TweakData(TWEAK_GAMEPLAY_CG_DISABLE_THIRST, TWEAK_CATEGORY_GAMEPLAY) == FALSE ) {
 			cdata(CDATA_THIRST, CHARA_PLAYER) = 15000
@@ -19890,11 +19936,11 @@
 						cdata(CDATA_HUNGER, tc) += 1000
 					}
 				loop
-				if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 1 ) {
+				if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 1 ) {
 					snd SOUNDLIST_WRITE1
 					txtef COLOR_GREEN
 					txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-					cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+					cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 				}
 				txtef COLOR_GREEN
 				if ( val == 0 ) {
@@ -19910,7 +19956,205 @@
 		buff = lang("冷やかし" + _ka(1), "You kidding? ")
 		goto *chat_default
 	}
-
+	if ( chatval == 149 ) {
+		invsubroutine = 1
+		invctrl = INVCTRL_MATERIAL_ENCHANT, 17
+		snd SOUNDLIST_INV
+		gosub *com_inventory
+		if ( stat == 1 ) {
+			listmax = 0
+			snd SOUNDLIST_GET1
+			inv(INV_ITEM_NUM, ci)--
+			modimp2 tc, inv(INV_ITEM_PARAM2, ci)
+			if ( cdata(CDATA_MASTER_SERVANT, tc) <= 65 ) {
+				chatMore lang("(警戒しながら匂いを嗅いでいる…)", "It smells suspicious..."), strmore
+			}
+			if ( cdata(CDATA_MASTER_SERVANT, tc) > 65 & cdata(CDATA_MASTER_SERVANT, tc) <= 85 ) {
+				chatMore lang("(じっと餌を見つめたまま、ヨダレを垂らしている…)", "It looks a little delicious..."), strmore
+			}
+			if ( cdata(CDATA_MASTER_SERVANT, tc) > 85 & cdata(CDATA_MASTER_SERVANT, tc) <= 100 ) {
+				chatMore lang("(怯えながらも餌を少しだけ口に運んだ…)", "I guess just a little bit won't hurt..."), strmore
+			}
+			if ( cdata(CDATA_MASTER_SERVANT, tc) >= 100 ) {
+				snd SOUNDLIST_COMPLETE1
+				chatMore lang("(どうやら、与えられた餌を気に入ったようだ！)", "It's not so bad being fed by you..."), strmore
+				rc = tc
+				gosub *add_ally
+				check_quest
+				goto *chat_end
+			}
+		}
+		goto *chat_default
+	}
+	if ( chatval == 150 ) {
+		txt lang("あなたは高速で屈伸しながら" + cdatan(CDATAN_NAME, tc) + "を煽り、気持ち良くなった。", "You insulted " + cdatan(CDATAN_NAME, tc) + " while jumping up and down at high speed.")
+		snd SOUNDLIST_CARD1
+		await 50
+		snd SOUNDLIST_CARD1
+		await 50
+		snd SOUNDLIST_CARD1
+		cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) += 16
+		if ( cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) > 100 ) {
+			if ( cdata(CDATA_SHIFT_FORM, CHARA_PLAYER) <= SHIFT_FORM_NONE & cdata(CDATA_EVOLUTION_STAGE, CHARA_PLAYER) <= 0 ) {
+				cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) = 100
+			}
+		}
+		if ( cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) > 200 ) {
+			cdata(CDATA_POWER_GAUGE, CHARA_PLAYER) = 200
+		}
+		kaiwa = rnd(3)
+		if ( kaiwa == 0 ) {
+			txt lang("「ざーこｗざーこｗ」", cnvtalk("Zaaaaako!"))
+		}
+		if ( kaiwa == 1 ) {
+			txt lang("「はい、勝ちーｗ」", cnvtalk("I wiiiiiin!"))
+		}
+		if ( kaiwa == 2 ) {
+			txt lang("「うぇええええいｗｗｗ」", cnvtalk("Weeeeeee!"))
+		}
+		chatMore lang("嫌われるからやめたほうがいい" + _yo(3) + "、そういうの…。", "People around you look at you with disgust. You should probably stop doing that..."), strmore
+		repeat 245
+			if ( cdata(CDATA_EXIST, cnt) != CHAR_STATE_ALIVE ) {
+				continue
+			}
+			if ( 0 == cnt ) {
+				continue
+			}
+			dx = cdata(CDATA_X, cnt)
+			dy = cdata(CDATA_Y, cnt)
+			if ( dist(cdata(CDATA_X, CHARA_PLAYER), cdata(CDATA_Y, CHARA_PLAYER), dx, dy) > sdataref(SKILL_DATAREF_TG, SKILL_SPACT_CHEER) \ 1000 + 1 ) {
+				continue
+			}
+			if ( fov_los(cdata(CDATA_X, CHARA_PLAYER), cdata(CDATA_Y, CHARA_PLAYER), dx, dy) == 0 ) {
+				continue
+			}
+			modimp cnt, -5
+		loop
+		goto *chat_default
+	}
+	if ( chatval == 151 ) {
+		azuke = 0
+		repeat 245
+			if ( cdata(CDATA_EXIST, cnt) != CHAR_STATE_ALIVE ) {
+				continue
+			}
+			if ( cnt < maxfollwer ) {
+				continue
+			}
+			if ( cdata(CDATA_RELATION, cnt) != RELATION_ALLY ) {
+				continue
+			}
+			if ( cbit(CHARA_BIT_NECRO, cnt) != TRUE ) {
+				continue
+			}
+			azuke++
+		loop
+		if ( azuke >= 5 ) {
+			snd SOUNDLIST_FAIL1
+			txtef COLOR_RED
+			txt lang("連れている味方が多すぎて、監視が行き届かないだろう…。", "It's hard to keep an eye on this prisoner of war, since you have so many allies...")
+			goto *chat_default
+		}
+		modimp tc, -20
+		modkarma 0, -5
+		if ( rnd(cdata(CDATA_MASTER_SERVANT, tc) + sdata(SKILL_ATTR_WIL, CHARA_PLAYER)) < rnd(sdata(SKILL_ATTR_WIL, tc) + 200) ) {
+			chatMore lang("その命令は聞けない" + _ga(3) + "見逃して" + _kure(3) + "…。", "I-I can't do that, but please forgive me..."), strmore
+			txtef COLOR_PURPLE
+			txt lang(cdatan(CDATAN_NAME, tc) + "は自分の立場を分かっていないようだ。", cdatan(CDATAN_NAME, tc) + " doesn't seem to understand own current position.")
+			goto *chat_default
+		}
+		else {
+			chatMore lang("ッ…！皆、" + _gomen(3) + "…。", "Sorry.. everyone..."), strmore
+			snd SOUNDLIST_LOCKED1
+			cdata(CDATA_RELATION, tc) = RELATION_ALLY
+			cdata(CDATA_RELATION_ORG, tc) = RELATION_ALLY
+			cbitmod CHARA_BIT_NECRO, tc, TRUE
+			cbitmod CHARA_BIT_SHADOW_CLONE, tc, TRUE
+			cbitmod CHARA_BIT_BEGGING_FOR_LIFE, tc, FALSE
+			goto *chat_end
+		}
+	}
+	if ( chatval == 144 ) {
+		flt
+		itemcreate -1, ITEM_ID_GOLD_PIECE, cdata(CDATA_X, tc), cdata(CDATA_Y, tc), (cdata(CDATA_GOLD, tc) + 1) / 100 + 1
+		if ( gdata(GDATA_FLAG_RARE_DROP) == 100 ) {
+			if ( rnd(4) == 0 ) {
+				flt
+				itemcreate -1, ITEM_ID_FIGHTING_DESTONE, cdata(CDATA_X, tc), cdata(CDATA_Y, tc), 0
+				inv(INV_ITEM_PARAM2, ci) = limit((cdata(CDATA_LEVEL, tc) / 10 + 1) * 10, 1, 999)
+				inv(INV_ITEM_STATUS, ci) = ITEM_STATUS_NORMAL
+			}
+		}
+		snd SOUNDLIST_PAYGOLD1
+		chatMore lang("ヒィッ！", "Eeeek!"), strbye
+		txt lang(cdatan(CDATAN_NAME, tc) + "は金貨を置いて逃げ去った。", cdatan(CDATAN_NAME, tc) + " left gold pieces and ran away.")
+		chara_vanquish tc
+		snd SOUNDLIST_EXITMAP1
+		goto *chat_end
+	}
+	if ( chatval == 145 ) {
+		modimp tc, -10
+		chatMore lang("ううっ…！", "Ugh...!"), strmore
+		gosub *sexsex2
+		goto *chat_end
+	}
+	if ( chatval == 146 ) {
+		chatMore lang("し、死にたくな――", "I don't want to die! Plea..."), strbye
+		snd SOUNDLIST_ATKSWORD
+		txtef COLOR_RED
+		txt lang(" *ブシュッ* ", "*Gash*")
+		txtvalid = 0
+		txt lang(name(0) + "は" + name(tc) + "の首をちょんぎった。", name(0) + " cut" + _s(CHARA_PLAYER) + " " + name(tc) + your(tc) + " head.")
+		cdata(CDATA_HP, tc) = 0
+		dmghp tc, cdata(CDATA_MAX_HP, tc), CHARA_PLAYER, SKILL_SPACT_DECAPITATION
+		goto *chat_end
+	}
+	if ( chatval == 147 ) {
+		if ( gdata(GDATA_FLAG_RARE_DROP) == 100 ) {
+			if ( rnd(2) == 0 ) {
+				flt
+				itemcreate -1, ITEM_ID_FIGHTING_DESTONE, cdata(CDATA_X, tc), cdata(CDATA_Y, tc), 0
+				inv(INV_ITEM_PARAM2, ci) = limit((cdata(CDATA_LEVEL, tc) / 10 + 1) * 10, 1, 999)
+				inv(INV_ITEM_STATUS, ci) = ITEM_STATUS_NORMAL
+			}
+		}
+		if ( gdata(GDATA_FLAG_RARE_DROP) == 100 ) {
+			if ( rnd(4) == 0 ) {
+				if ( cdata(CDATA_INIT_ATTR, tc) + cdata(CDATA_INIT_LIFEMANA, tc) >= 1000 ) {
+					flt
+					itemcreate -1, ITEM_ID_AWAKE_DESTONE, cdata(CDATA_X, tc), cdata(CDATA_Y, tc), 0
+					inv(INV_ITEM_PARAM2, ci) = cdata(CDATA_INIT_ATTR, tc)
+					inv(INV_ITEM_PARAM3, ci) = cdata(CDATA_INIT_LIFEMANA, tc)
+					inv(INV_ITEM_AMUR_CAGE, ci) = cdata(CDATA_INIT_SPEED, tc)
+					inv(INV_ITEM_STATUS, ci) = ITEM_STATUS_NORMAL
+				}
+			}
+		}
+		chatMore lang("はは、助かったぁ…。", "I was spared! Hahaha...!"), strbye
+		chara_vanquish tc
+		snd SOUNDLIST_EXITMAP1
+		goto *chat_end
+	}
+	if ( chatval == 148 ) {
+		if ( gdata(GDATA_FLAG_RARE_DROP) == 100 ) {
+			if ( rnd(4) == 0 ) {
+				flt
+				itemcreate -1, ITEM_ID_FIGHTING_DESTONE, cdata(CDATA_X, tc), cdata(CDATA_Y, tc), 0
+				inv(INV_ITEM_PARAM2, ci) = limit((cdata(CDATA_LEVEL, tc) / 10 + 1) * 10, 1, 999)
+				inv(INV_ITEM_STATUS, ci) = ITEM_STATUS_NORMAL
+			}
+		}
+		chatMore lang("はは、助かっ――", "I was spared! Hahah..."), strbye
+		snd SOUNDLIST_ATKSWORD
+		txtef COLOR_RED
+		txt lang(" *ブシュッ* ", "*Gash*")
+		txtvalid = 0
+		txt lang(name(0) + "は" + name(tc) + "の首をちょんぎった。", name(0) + " cut" + _s(CHARA_PLAYER) + " " + name(tc) + your(tc) + " head.")
+		cdata(CDATA_HP, tc) = 0
+		dmghp tc, cdata(CDATA_MAX_HP, tc), CHARA_PLAYER, SKILL_SPACT_DECAPITATION
+		modkarma 0, -5
+		goto *chat_end
+	}
 	if ( chatval == 94 ) {
 		chatList 0, lang("別行動時は(遠距離)散策", "Roam while breaking apart.")
 		chatList 1, lang("別行動時は(近距離)散策", "Dull while breaking apart.")
@@ -24635,6 +24879,15 @@
 		if ( evochat < 2 | evochat == 11 ) {
 			x = wx + 136
 			y = wy + wh - 56 - keyrange * 19 + cnt * 19 + 2
+			/********** MMAHACK - MULTILINED CHAT OPTION - BEGINNING **********/
+			if ( evochat == 0 ) {
+				x = wx + 136 + cnt / 10 * 216
+				y = wy + wh - 56 - limit(keyrange, 0, 10) * 19 + cnt \ 10 * 19 + 2
+				if ( keyrange > 10 & (cnt >= 10 | cnt < keyrange - 10) ) {
+					listn(0, cnt) = strmid(listn(0, cnt), 0, 24)
+				}
+			}
+			/********** MMAHACK - MULTILINED CHAT OPTION - ENDING **********/
 		}
 		if ( evochat >= 2 & evochat < 11 ) {
 			x = wx + 66
@@ -24650,7 +24903,7 @@
 	cursor_check
 	/********** MMAHACK - MOUSE OPERATION - BEGINNING **********/
 	if ( cfg_mmah_mouseoperation ) {
-		cursor_check@MMAH wy + wh - 56 - keyrange * 19, 19
+		cursor_check@MMAH wy + wh - 56 - limit(keyrange, 0, 10 + 999 * (evochat != 0)) * 19, 19
 	}
 	/********** MMAHACK - MOUSE OPERATION - ENDING **********/
 	stick a, 128
@@ -25098,7 +25351,7 @@
 				pos wx + 32, wy + 310
 				mes "" + cnvdate(cdata(CDATA_HIRE_DATE, tc), 2)
 			}
-			if ( tc < MAX_CHARA_FOLLOWER | cbit(CHARA_BIT_LIVESTOCK, tc) == 1 | cbit(CHARA_BIT_LABOR_CAMP, tc) == TRUE ) {
+			if ( tc < MAX_CHARA_FOLLOWER | cbit(CHARA_BIT_LIVESTOCK, tc) == 1 | cbit(CHARA_BIT_LABOR_CAMP, tc) == TRUE | cbit(CHARA_BIT_BEGGING_FOR_LIFE, tc) == TRUE ) {
 				s = _impressionb(implevel2(cdata(CDATA_MASTER_SERVANT, tc)))
 				if ( cdata(CDATA_HEART_LOCK_RELATION, tc) == (-11) ) {
 					s = _impressionb1(implevel2(cdata(CDATA_MASTER_SERVANT, tc)))
