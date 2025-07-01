@@ -1,3 +1,58 @@
+# 2.27.2.1
+
+# Added
+- Tachi-e during Evochat: _HH, _QH, _AH, _BH, _FH, _EH
+
+# Fixed
+- Fixes bug that causes more than 1 skill fragment to be used.
+- Added missing flavor text for surrendered enemies.
+- Custom AI not using spells due to seal magic.
+
+# 2.27.2.0
+
+# Added
+- Ported all changes from Elona+ 2.27R.
+
+# 2.27.1.0
+
+# Added
+- Ported all changes from Elona+ 2.27.
+- Tweak to disable the begging for life system for enemies.
+
+# Fixed
+- (Plus) Fixed reflect damage calculated using the wrong damage number
+- (Plus) Pet target reset due to begging-bitflag bug.
+- (Plus) Fixed crashes due to shared item/material field.
+- (Plus) Fixed player hostile action overwrites aggro.
+
+# 2.26.1.0
+
+# Added
+- Ported all changes from Elona+ 2.26.
+
+# Fixed
+- (Plus) Cut-in speed lines not disappearing / not moving during animation.
+- (2025/4/20) Stamina regen is 0.3 lower when wetting.
+- (2025/4/30) (Plus) Sp-act buffs using skill id instead of skill stats during effect power calculation
+
+# TCG
+- Changed effect of Act II ninjas and gave them decks.
+- Fixed Quruiza card logic and buffed her by a little.
+- Fixed crash after winning lethal tcg with 0 hp.
+
+# 2.26.1.0
+
+# Added
+- Ported all changes from Elona+ 2.26.
+
+# Fixed
+- (Plus) Cut-in speed lines not disappearing / not moving during animation.
+
+# TCG
+- Changed effect of Act II ninjas and gave them decks.
+- Fixed Quruiza card logic and buffed her by a little.
+- Fixed crash after winning lethal tcg with 0 hp.
+
 # 2.25.1.1
 
 # Added

@@ -356,6 +356,9 @@
 		if ( customtalk_dbmode == DBMODE_FLAVOR_LEADING ) {
 			locvar_customtalk_s = "%txtLeading"
 		}
+		if ( customtalk_dbmode == DBMODE_FLAVOR_CLEMENTIA ) {
+			locvar_customtalk_s = "%txtClementia"
+		}
 		/********** OOMSESTEPNC - EXTRA CNPC CONFIG - CUSTOM TALK - BEGINNING **********/
 		if ( customtalk_dbmode == 401 ) { locvar_customtalk_s = "%txtsorosu" }
 		if ( customtalk_dbmode == 402 ) { locvar_customtalk_s = "%txtturusu" }
@@ -1437,6 +1440,13 @@
 			cdata(CDATA_SPEED, refreshspeed_arg1) = cdata(CDATA_SPEED, refreshspeed_arg1) * 9 / 10
 		}
 	}
+	if ( cdata(CDATA_ID, refreshspeed_arg1) == CREATURE_ID_CLUB_FEATHER ) {
+		if ( cdata(CDATA_ALLIED, refreshspeed_arg1) == 0 ) {
+			if ( cdata(CDATA_SPEED, refreshspeed_arg1) >= 50 ) {
+				cdata(CDATA_SPEED, refreshspeed_arg1) = cdata(CDATA_SPEED, refreshspeed_arg1) / 50 * (50 + cdata(CDATA_EVOLUTION_STAGE, refreshspeed_arg1))
+			}
+		}
+	}
 	if ( cdata(CDATA_IN_TAGTEAM, refreshspeed_arg1) != 0 ) {
 		cdata(CDATA_SPEED, cdata(CDATA_TAGTEAM_PARTNER, refreshspeed_arg1)) = sdata(SKILL_ATTR_SPD, cdata(CDATA_TAGTEAM_PARTNER, refreshspeed_arg1))
 		if ( cdata(CDATA_BODY_SPEED_FIX, cdata(CDATA_TAGTEAM_PARTNER, refreshspeed_arg1)) != 0 ) {
@@ -2006,9 +2016,12 @@
 				txtmore
 				txt lang(name(hostileaction_target) + "は激怒した。", name(hostileaction_target) + " gets furious!")
 			}
-			cdata(CDATA_RELATION, hostileaction_target) = -3
-			cdata(CDATA_AI_AGGRO, hostileaction_target) = 80
-			cdata(CDATA_TARGET, hostileaction_target) = hostileaction_source
+			if ( cdata(CDATA_AI_AGGRO, hostileaction_target) <= 0 ) {
+				cdata(CDATA_RELATION, hostileaction_target) = -3
+				cdata(CDATA_AI_AGGRO, hostileaction_target) = 80
+				cdata(CDATA_TARGET, hostileaction_target) = hostileaction_source
+				// DamagePopupAdd "Hostile Action Aggro: " + cdatan(CDATAN_NAME, cdata(CDATA_TARGET, hostileaction_target)) + "/" + cdata(CDATA_AI_AGGRO, hostileaction_target), hostileaction_target, DMGPOPUP_MISS, 0
+			}
 		}
 		if ( cdata(CDATA_ID, hostileaction_target) != CREATURE_ID_RAIZEL_THE_OLD_WIZARD | cdata(CDATA_ALLIED, hostileaction_target) != 0 | gdata(GDATA_FLAG_MAIN) < 760 ) {
 			if ( gdata(GDATA_TEMPORARY_FLAGS2) < 1000 & jamesangerhack == 0 ) {
@@ -3880,11 +3893,11 @@
 	if ( check_talk_arg1 >= 0 ) {
 		if ( check_talk_arg1 == 0 | cdata(CDATA_RELATION, check_talk_arg1) >= 10 ) {
 			if ( cdata(CDATA_LEVEL, CHARA_PLAYER) < cdata(CDATA_LEVEL, check_talk_arg2) ) {
-				if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 4 ) {
+				if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 4 ) {
 					snd SOUNDLIST_WRITE1
 					txtef COLOR_GREEN
 					txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-					cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+					cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 				}
 			}
 			if ( cbit(CHARA_BIT_NECRO, check_talk_arg2) != TRUE & cdata(CDATA_RELATION, check_talk_arg2) != RELATION_ALLY & gdata(GDATA_FLAG_MAIN) != 900 ) {
@@ -3988,11 +4001,11 @@
 	if ( check_kill_arg1 >= 0 ) {
 		if ( check_kill_arg1 == 0 | cdata(CDATA_RELATION, check_kill_arg1) >= 10 ) {
 			if ( cdata(CDATA_LEVEL, CHARA_PLAYER) < cdata(CDATA_LEVEL, check_kill_arg2) ) {
-				if ( cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) == 4 ) {
+				if ( cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) == 4 ) {
 					snd SOUNDLIST_WRITE1
 					txtef COLOR_GREEN
 					txt lang("ジャーナルが更新された。", "Your journal has been updated.")
-					cdata(CDATA_MATERIAL1_COUNTER, CHARA_PLAYER) += 1000
+					cdata(CDATA_DAILY_QUEST1, CHARA_PLAYER) += 1000
 				}
 			}
 			if ( cbit(CHARA_BIT_NECRO, check_kill_arg2) != TRUE & cdata(CDATA_RELATION, check_kill_arg2) != RELATION_ALLY & gdata(GDATA_FLAG_MAIN) != 900 ) {
@@ -5872,6 +5885,27 @@
 				locvar_dmghp_dmg = locvar_dmghp_dmg / 100 * (100 + limit(cdata(CDATA_SANITY, dmghp_source), 0, 100))
 			}
 		}
+		if ( cdata(CDATA_ID, dmghp_source) == CREATURE_ID_SPADE_WARRIOR ) {
+			if ( cdata(CDATA_ALLIED, dmghp_source) == 0 ) {
+				if ( locvar_dmghp_dmg >= 50 ) {
+					locvar_dmghp_dmg = locvar_dmghp_dmg / 50 * (50 + cdata(CDATA_EVOLUTION_STAGE, dmghp_source))
+				}
+			}
+		}
+		if ( cdata(CDATA_ID, dmghp_source) == CREATURE_ID_SPADE_WARRIOR | cdata(CDATA_ID, dmghp_source) == CREATURE_ID_CLUB_FEATHER | cdata(CDATA_ID, dmghp_source) == CREATURE_ID_DIAMOND_EYES | cdata(CDATA_ID, dmghp_source) == CREATURE_ID_HEART_WITCH ) {
+			if ( cdata(CDATA_ALLIED, dmghp_source) == 0 ) {
+				if ( cdata(CDATA_PIC, dmghp_source) != xy2pic(18, 35) ) {
+					cdata(CDATA_DIRECTIVE_MODE, dmghp_source) = DIRECTIVE_MODE_DEFENSIVE
+				}
+			}
+		}
+	}
+	if ( cdata(CDATA_ID, dmghp_charid) == CREATURE_ID_DIAMOND_EYES ) {
+		if ( cdata(CDATA_ALLIED, dmghp_charid) == 0 ) {
+			if ( locvar_dmghp_dmg >= 50 ) {
+				locvar_dmghp_dmg = locvar_dmghp_dmg / 50 * (50 - cdata(CDATA_EVOLUTION_STAGE, dmghp_charid))
+			}
+		}
 	}
 	if ( cdata(CDATA_DIRECTIVE_MODE, dmghp_charid) == DIRECTIVE_MODE_DEFENSIVE ) {
 		locvar_dmghp_dmg = locvar_dmghp_dmg / 3
@@ -6312,6 +6346,9 @@
 			if ( dmghp_charid != CHARA_PLAYER ) {
 				if ( cdata(CDATA_CONDITION_FEAR, dmghp_charid) == 0 ) {
 					if ( cbit(CHARA_BIT_RES_FEAR, dmghp_charid) == 0 ) {
+						if ( cdata(CDATA_QUALITY, dmghp_charid) >= FIX_QUALITY_MIRACLE ) {
+							locvar_dmghp_f = 0
+						}
 						if ( locvar_dmghp_dmg * 100 / cdata(CDATA_MAX_HP, dmghp_charid) + 10 > rnd(200) ) {
 							locvar_dmghp_f = 1
 						}
@@ -6339,6 +6376,27 @@
 					}
 				}
 			}
+		}
+		if ( TweakData(TWEAK_GAMEPLAY_DISABLE_CLEMENTIA, TWEAK_CATEGORY_GAMEPLAY) <= FALSE ) {
+		if ( cdata(CDATA_HP, dmghp_charid) < cdata(CDATA_MAX_HP, dmghp_charid) / 10 ) {
+			if ( dmghp_charid != CHARA_PLAYER ) {
+				if ( cbit(CHARA_BIT_BEGGING_FOR_LIFE, dmghp_charid) == FALSE ) {
+					locvar_dmghp_f = 1
+					if ( cdata(CDATA_RELATION, dmghp_charid) == RELATION_ALLY | dmghp_charid < MAX_CHARA_FOLLOWER | cbit(CHARA_BIT_NECRO, dmghp_charid) == TRUE | cdata(CDATA_QUALITY, dmghp_charid) >= FIX_QUALITY_MIRACLE | cdata(CDATA_ROLE, dmghp_charid) != ROLE_NONE | cbit(CHARA_BIT_PRECIOUS, dmghp_charid) == TRUE | cdata(CDATA_CHARACTER_TIER, dmghp_charid) == CHARACTER_TIER_SUMMONED_NORMAL | cbit(CHARA_BIT_BODYGUARD, dmghp_charid) == TRUE | gdata(GDATA_FLAG_DUEL_TARGET) == dmghp_charid ) {
+						locvar_dmghp_f = 0
+					}
+					if ( locvar_dmghp_f ) {
+						if ( cbit(CHARA_BIT_SANDBAG, dmghp_charid) != TRUE ) {
+							cdata(CDATA_CONDITION_FEAR, dmghp_charid) = rnd(20) + 50
+							txtmore
+							txtef COLOR_SKY_BLUE
+							txt lang(name(dmghp_charid) + "は恐怖のあまり命乞いを始めた。話を聞いてやろうか？", name(dmghp_charid) + " was frightened and began to beg for their lives. Maybe I could talk to " + name(dmghp_charid) + " now.")
+							cbitmod CHARA_BIT_BEGGING_FOR_LIFE, dmghp_charid, TRUE
+						}
+					}
+				}
+			}
+		}
 		}
 		if ( TweakData(TWEAK_GAMEPLAY_REVERT_POST_208_ELEMENT_CHANGE, TWEAK_CATEGORY_GAMEPLAY) != FALSE ) {
 			// BEGINNING - Pre-2.08 behavior, do not apply changes here.
@@ -8297,9 +8355,9 @@
 	if ( gain_ap_source == "kill" ) {
 		if ( cbit(CHARA_BIT_NECRO, gain_ap_chara_id) == 1 & gain_ap_chara_id != CHARA_PLAYER ) {
 			skillexp SKILL_NORMAL_CONTROL_MAGIC, CHARA_PLAYER, limit(cdata(CDATA_LEVEL, gain_ap_chara_id) + 200, 200, 1000)
-			gain_ap (gain_ap_source + " of your necro-minion"), CHARA_PLAYER, gain_ap_enemy_attr, gain_ap_enemy_lifemana, gain_ap_enemy_speed, gain_ap_enemy_orgspd,  1, 3, 3, 3, 2,   0, 0, 0, 0, 0
+			gain_ap (gain_ap_source + " of your minion"), CHARA_PLAYER, gain_ap_enemy_attr, gain_ap_enemy_lifemana, gain_ap_enemy_speed, gain_ap_enemy_orgspd,  1, 3, 3, 3, 2,   0, 0, 0, 0, 0
 			if ( cdata(CDATA_IN_TAGTEAM, gain_ap_chara_id) != 0 ) {
-				gain_ap (gain_ap_source + " of your necro-minion"), cdata(CDATA_TAGTEAM_PARTNER, CHARA_PLAYER), gain_ap_enemy_attr, gain_ap_enemy_lifemana, gain_ap_enemy_speed, 0,   1, 1, 1, 1, 1,   0, 0, 0, 0, 0
+				gain_ap (gain_ap_source + " of your minion"), cdata(CDATA_TAGTEAM_PARTNER, CHARA_PLAYER), gain_ap_enemy_attr, gain_ap_enemy_lifemana, gain_ap_enemy_speed, 0,   1, 1, 1, 1, 1,   0, 0, 0, 0, 0
 			}
 		}
 		if ( gdata(GDATA_RIDER) != 0 ) {
@@ -8553,6 +8611,34 @@
 		}
 	}
 	return FALSE
+
+#deffunc chara_cutin int chara_cutin_charidx
+	if ( chara_cutin_charidx < 0 | chara_cutin_charidx >= MAX_CHARA_TOTAL) {
+		return
+	}
+	if ( cdata(CDATA_RELATION, chara_cutin_charidx) == RELATION_ENEMY ) {
+		waza = -1
+	}
+	else {
+		waza = 1
+	}
+	pic = cdata(CDATA_PIC, chara_cutin_charidx) \ 1000 + cdata(CDATA_CHARA_PIC, chara_cutin_charidx) * 1000 + refchara(cdata(CDATA_ID, chara_cutin_charidx), DBSPEC_CHARA_COL) * 10000
+	if ( chara_cutin_charidx == CHARA_PLAYER ) {
+		pic = -1
+	}
+	exist exedir + "user\\graphic2\\cutin" + pic + ".bmp"
+	if ( strsize == (-1) ) {
+		snd SOUNDLIST_MECHA20
+		repeat 2
+			animeload 92, chara_cutin_charidx
+		loop
+	}
+	else {
+		animeid = ANIMATION_CUT_IN
+		anic = chara_cutin_charidx
+		gosub *anime
+	}
+	return
 
 #deffunc chara_guardbreak int chara_guardbreak_charidx, int chara_guardbreak_amount
 	if ( chara_guardbreak_charidx < 0 | chara_guardbreak_charidx >= MAX_CHARA_TOTAL) {
